@@ -1,0 +1,342 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import ImageConverter from '../components/ImageConverter.astro';
+
+// FAQ content: rendered on the page AND mirrored into FAQPage JSON-LD
+// (Google requires the structured data to match visible content)
+const faqs = [
+	{
+		q: 'How do I convert a PNG to WebP with Flashtools?',
+		a: 'Drop a PNG file onto the page, click to browse for one, or paste it straight from your clipboard. Adjust the quality slider if you like, inspect the result in the comparison view, then click Download WebP. The whole conversion happens instantly in your browser.',
+	},
+	{
+		q: 'Are my images uploaded to a server?',
+		a: 'No. Flashtools runs entirely in your browser using the HTML5 Canvas API. Your files never leave your device, and the converter keeps working even if you disconnect from the internet after the page has loaded.',
+	},
+	{
+		q: 'How much smaller is WebP compared to PNG?',
+		a: 'It depends on the image, but screenshots and graphics typically shrink by 60–90% at the default 80% quality with little to no visible difference. The built-in before/after slider lets you verify the quality before downloading.',
+	},
+	{
+		q: 'Does WebP keep transparency?',
+		a: 'Yes. WebP fully supports alpha transparency, so transparent PNGs stay transparent after conversion — at a fraction of the file size.',
+	},
+	{
+		q: 'Which browsers does Flashtools work in?',
+		a: 'Chrome, Edge, Firefox, Opera, and other modern Chromium- or Gecko-based browsers all encode WebP natively. Safari currently cannot encode WebP from a canvas, so Flashtools will show a notice there instead of producing a broken file.',
+	},
+	{
+		q: 'Is Flashtools free?',
+		a: 'Completely. No sign-up, no watermarks, no file limits, no ads. It is a static page — your own browser does the work.',
+	},
+];
+
+const faqJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "FAQPage",
+	"mainEntity": faqs.map((f) => ({
+		"@type": "Question",
+		"name": f.q,
+		"acceptedAnswer": { "@type": "Answer", "text": f.a },
+	})),
+};
+
+// Structured data for Google Search engine rich snippets
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Flashtools PNG to WebP Converter",
+  "operatingSystem": "All",
+  "applicationCategory": "MultimediaApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0.00",
+    "priceCurrency": "USD"
+  },
+  "description": "High-performance client-side PNG to WebP converter. Drag and drop PNG files to compress and download WebP instantly in your browser — no uploads, no servers.",
+  "browserRequirements": "Requires a modern web browser with HTML5 Canvas support."
+};
+---
+
+<Layout 
+	title="Flashtools - Free Client-Side PNG to WebP Converter" 
+	description="Convert PNG images to WebP format instantly in your browser. 100% private and client-side using the HTML5 Canvas API. Zero server uploads."
+	canonicalPath="/"
+>
+	<!-- Google Search JSON-LD Structured Data Schema -->
+	<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+	<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+
+	<Header />
+
+	<main class="main-layout">
+		<!-- Core Application -->
+		<section class="app-section">
+			<ImageConverter />
+		</section>
+
+		<!-- Information Grid Section -->
+		<section class="info-section">
+			<h2 class="section-title">How it works</h2>
+			<div class="info-grid">
+				<div class="info-card">
+					<div class="info-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+					</div>
+					<h3>100% Private & Local</h3>
+					<p>Your images never leave your computer. All rendering, compression, and file output are handled inside your web browser sandbox using client-side JavaScript APIs.</p>
+				</div>
+				<div class="info-card">
+					<div class="info-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+					</div>
+					<h3>High-Speed Performance</h3>
+					<p>Leverages native web platform features like HTML5 Canvas and browser image processing engines to output high-fidelity WebP files in fractions of a second.</p>
+				</div>
+				<div class="info-card">
+					<div class="info-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+					</div>
+					<h3>Modern WebP Format</h3>
+					<p>Convert PNG screenshots, graphics, or assets into the modern WebP standard, slashing asset sizes by up to 80% while retaining rich alpha transparency channels.</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- FAQ Section (mirrors FAQPage JSON-LD) -->
+		<section class="info-section faq-section">
+			<h2 class="section-title">Frequently asked questions</h2>
+			<div class="faq-list">
+				{faqs.map((f) => (
+					<details class="faq-item">
+						<summary>{f.q}</summary>
+						<p>{f.a}</p>
+					</details>
+				))}
+			</div>
+		</section>
+	</main>
+
+	<footer class="footer">
+		<div class="footer-content">
+			<p>&copy; {new Date().getFullYear()} Flashtools. Crafted for extreme speed and security.</p>
+			<div class="footer-links">
+				<a href="/stats" class="footer-link">Live Stats</a>
+				<span class="bullet">&bull;</span>
+				<a href="/privacy" class="footer-link">Privacy Policy</a>
+				<span class="bullet">&bull;</span>
+				<a href="/terms" class="footer-link">Terms of Service</a>
+			</div>
+		</div>
+	</footer>
+</Layout>
+
+<style>
+	.main-layout {
+		flex-grow: 1;
+		width: 100%;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 3rem 2rem 5rem 2rem;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		gap: 5rem;
+		z-index: 10;
+	}
+
+	.app-section {
+		width: 100%;
+	}
+
+	/* Information Section styling */
+	.info-section {
+		display: flex;
+		flex-direction: column;
+		gap: 2.5rem;
+		border-top: 1px solid rgba(245, 242, 233, 0.06);
+		padding-top: 5rem;
+	}
+
+	.section-title {
+		font-size: 1.6rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		text-align: center;
+		color: var(--color-text);
+	}
+
+	.section-title::after {
+		content: '';
+		display: block;
+		width: 64px;
+		height: 4px;
+		margin: 0.85rem auto 0 auto;
+		background: var(--hazard-stripes);
+	}
+
+	.info-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: 2rem;
+	}
+
+	.info-card {
+		background: var(--color-card-bg);
+		border: 1px solid var(--color-card-border);
+		padding: 2rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		transition: border-color var(--transition-normal), transform var(--transition-normal);
+	}
+
+	.info-card:hover {
+		border-color: rgba(255, 212, 0, 0.5);
+		transform: translateY(-2px);
+	}
+
+	.info-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		background: rgba(255, 212, 0, 0.08);
+		border: 1px solid rgba(255, 212, 0, 0.2);
+		color: var(--color-primary);
+	}
+
+	.info-card h3 {
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.info-card p {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		line-height: 1.6;
+	}
+
+	/* FAQ styling */
+	.faq-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		max-width: 820px;
+		width: 100%;
+		margin: 0 auto;
+	}
+
+	.faq-item {
+		background: var(--color-card-bg);
+		border: 1px solid var(--color-card-border);
+		transition: border-color var(--transition-normal);
+	}
+
+	.faq-item[open],
+	.faq-item:hover {
+		border-color: rgba(255, 212, 0, 0.4);
+	}
+
+	.faq-item summary {
+		padding: 1.1rem 1.25rem;
+		font-weight: 600;
+		font-size: 0.975rem;
+		color: var(--color-text);
+		cursor: pointer;
+		list-style: none;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1rem;
+		user-select: none;
+	}
+
+	.faq-item summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.faq-item summary::after {
+		content: '+';
+		color: var(--color-primary);
+		font-size: 1.4rem;
+		font-weight: 700;
+		line-height: 1;
+		flex-shrink: 0;
+	}
+
+	.faq-item[open] summary::after {
+		content: '\2013';
+	}
+
+	.faq-item p {
+		padding: 0 1.25rem 1.25rem 1.25rem;
+		font-size: 0.9rem;
+		color: var(--color-text-muted);
+		line-height: 1.7;
+	}
+
+	/* Footer styling */
+	.footer {
+		width: 100%;
+		border-top: 1px solid var(--color-card-border);
+		background: rgba(10, 10, 8, 0.85);
+		backdrop-filter: blur(12px);
+		padding: 2rem;
+		box-sizing: border-box;
+		margin-top: auto;
+		z-index: 10;
+	}
+
+	.footer-content {
+		max-width: 1200px;
+		margin: 0 auto;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 0.85rem;
+		color: var(--color-text-dim);
+	}
+
+	.footer-links {
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
+	}
+
+	.footer-link {
+		color: var(--color-text-dim);
+		text-decoration: none;
+		transition: color var(--transition-fast);
+	}
+
+	.footer-link:hover {
+		color: var(--color-text-muted);
+	}
+
+	.bullet {
+		color: rgba(245, 242, 233, 0.2);
+	}
+
+	@media (max-width: 640px) {
+		.main-layout {
+			padding: 2rem 1.25rem 3rem 1.25rem;
+			gap: 3rem;
+		}
+
+		.info-section {
+			padding-top: 3rem;
+		}
+
+		.footer-content {
+			flex-direction: column;
+			gap: 1rem;
+			align-items: center;
+			text-align: center;
+		}
+	}
+</style>

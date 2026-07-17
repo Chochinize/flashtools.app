@@ -1,0 +1,50 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: flashtools
+  namespace: flashtools
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    cert-manager.io/cluster-issuer: "letsencrypt-dns01"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - flashtools.app
+        - www.flashtools.app
+      secretName: flashtools-tls
+  rules:
+    - host: flashtools.app
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: flashtools
+                port:
+                  number: 80
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: flashtools-analytics
+                port:
+                  number: 5100
+    - host: www.flashtools.app
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: flashtools
+                port:
+                  number: 80
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: flashtools-analytics
+                port:
+                  number: 5100

@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: flashtools-analytics-data
+  namespace: flashtools
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flashtools-analytics
+  namespace: flashtools
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: flashtools-analytics
+  template:
+    metadata:
+      labels:
+        app: flashtools-analytics
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - vm
+                      - vm1
+                      - vm2
+      containers:
+        - name: analytics
+          image: chochinize/flashtools-analytics:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5100
+          env:
+            - name: DATA_DIR
+              value: /data
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "25m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 5100
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 5100
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: flashtools-analytics-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flashtools-analytics
+  namespace: flashtools
+spec:
+  selector:
+    app: flashtools-analytics
+  ports:
+    - port: 5100
+      targetPort: 5100

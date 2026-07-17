@@ -1,0 +1,234 @@
+---
+---
+<div class="dropzone-container" id="dropzone">
+	<input type="file" id="file-input" accept="image/png" class="file-input" />
+	
+	<div class="dropzone-content">
+		<!-- Dynamic Icon -->
+		<div class="upload-icon-wrapper">
+			<svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+			</svg>
+			<svg xmlns="http://www.w3.org/2000/svg" class="arrow-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+			</svg>
+		</div>
+
+		<div class="text-group">
+			<h3 class="title">Drag & drop your PNG here</h3>
+			<p class="subtitle">or <span class="browse-link">browse your files</span></p>
+			<p class="helper-text">Supports PNG files. 100% processed in-browser.</p>
+		</div>
+	</div>
+</div>
+
+<style>
+	.dropzone-container {
+		position: relative;
+		width: 100%;
+		min-height: 220px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		border: 2px dashed rgba(255, 212, 0, 0.35);
+		background: var(--color-card-bg);
+		cursor: pointer;
+		overflow: hidden;
+		transition: border-color var(--transition-normal), background-color var(--transition-normal), transform var(--transition-fast), box-shadow var(--transition-normal);
+		box-shadow: var(--shadow-premium);
+	}
+
+	.dropzone-container:hover {
+		border-color: var(--color-primary);
+		background: var(--color-card-bg-hover);
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-premium), var(--shadow-glow);
+	}
+
+	.dropzone-container.drag-over {
+		border-color: var(--color-primary);
+		background: rgba(255, 212, 0,0.05);
+		box-shadow: var(--shadow-premium), 0 0 30px rgba(255, 212, 0,0.25);
+		transform: scale(1.01);
+	}
+
+	.file-input {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		opacity: 0;
+		cursor: pointer;
+		z-index: 10;
+	}
+
+	.dropzone-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.25rem;
+		text-align: center;
+		padding: 2.5rem;
+		pointer-events: none;
+		user-select: none;
+	}
+
+	/* Upload Icon Animations */
+	.upload-icon-wrapper {
+		position: relative;
+		width: 56px;
+		height: 56px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background: rgba(245, 242, 233, 0.03);
+		border: 1px solid rgba(245, 242, 233, 0.08);
+		color: var(--color-text-muted);
+		transition: color var(--transition-normal), background-color var(--transition-normal), border-color var(--transition-normal);
+	}
+
+	.dropzone-container:hover .upload-icon-wrapper,
+	.dropzone-container.drag-over .upload-icon-wrapper {
+		color: var(--color-primary);
+		background: rgba(255, 212, 0,0.1);
+		border-color: rgba(255, 212, 0,0.2);
+	}
+
+	.upload-icon {
+		width: 28px;
+		height: 28px;
+		transition: transform var(--transition-normal);
+	}
+
+	.arrow-icon {
+		width: 14px;
+		height: 14px;
+		position: absolute;
+		bottom: 12px;
+		right: 12px;
+		color: var(--color-primary);
+		opacity: 0;
+		transform: translateY(4px);
+		transition: opacity var(--transition-fast), transform var(--transition-fast);
+	}
+
+	.dropzone-container:hover .upload-icon {
+		transform: translateY(-2px);
+	}
+
+	.dropzone-container:hover .arrow-icon {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	.dropzone-container.drag-over .upload-icon {
+		transform: translateY(-4px) scale(0.9);
+		animation: bounce 1s infinite alternate;
+	}
+
+	@keyframes bounce {
+		0% { transform: translateY(-4px); }
+		100% { transform: translateY(-8px); }
+	}
+
+	/* Text styling */
+	.text-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+	}
+
+	.title {
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: var(--color-text);
+		letter-spacing: -0.01em;
+	}
+
+	.subtitle {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+	}
+
+	.browse-link {
+		color: var(--color-primary);
+		font-weight: 500;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+
+	.helper-text {
+		font-size: 0.75rem;
+		color: var(--color-text-dim);
+		margin-top: 0.5rem;
+	}
+</style>
+
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const dropzone = document.getElementById('dropzone') as HTMLElement;
+		const fileInput = document.getElementById('file-input') as HTMLInputElement;
+
+		if (!dropzone || !fileInput) return;
+
+		// Styling event states
+		['dragenter', 'dragover'].forEach(eventName => {
+			dropzone.addEventListener(eventName, (e) => {
+				e.preventDefault();
+				dropzone.classList.add('drag-over');
+			}, false);
+		});
+
+		['dragleave', 'drop'].forEach(eventName => {
+			dropzone.addEventListener(eventName, (e) => {
+				e.preventDefault();
+				dropzone.classList.remove('drag-over');
+			}, false);
+		});
+
+		// Listen to dropped files
+		dropzone.addEventListener('drop', (e: DragEvent) => {
+			const dt = e.dataTransfer;
+			const files = dt?.files;
+			if (files && files.length > 0) {
+				handleFileSelect(files[0]);
+			}
+		});
+
+		// Listen to standard selection
+		fileInput.addEventListener('change', (e: Event) => {
+			const target = e.target as HTMLInputElement;
+			const files = target.files;
+			if (files && files.length > 0) {
+				handleFileSelect(files[0]);
+			}
+		});
+
+		// Clipboard paste integration
+		document.addEventListener('paste', (e: ClipboardEvent) => {
+			const items = e.clipboardData?.items;
+			if (!items) return;
+			for (let i = 0; i < items.length; i++) {
+				if (items[i].type.indexOf('image/png') !== -1) {
+					const file = items[i].getAsFile();
+					if (file) handleFileSelect(file);
+					break;
+				}
+			}
+		});
+
+		function handleFileSelect(file: File) {
+			if (file.type !== 'image/png') {
+				alert('Please select a valid PNG image file.');
+				return;
+			}
+
+			// Broadcast file selected event
+			const fileEvent = new CustomEvent('png-file-selected', { 
+				detail: { file } 
+			});
+			document.dispatchEvent(fileEvent);
+		}
+	});
+</script>

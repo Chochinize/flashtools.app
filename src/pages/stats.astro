@@ -1,0 +1,575 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+---
+
+<Layout title="Live Stats - Flashtools" description="Live anonymous usage counters for Flashtools." noindex={true}>
+	<Header />
+
+	<main class="stats-layout">
+		<div class="stats-head">
+			<div>
+				<h1>Live Stats</h1>
+				<p class="stats-sub">
+					Real-time anonymous counters — the same three events described in the
+					<a href="/privacy">privacy policy</a>. No cookies, no identifiers, nothing personal.
+				</p>
+			</div>
+			<div class="stats-meta">
+				<span id="updated-at" class="updated-at">loading…</span>
+				<button id="btn-refresh" class="refresh-btn" type="button">Refresh</button>
+			</div>
+		</div>
+
+		<div id="stats-error" class="stats-error hidden">
+			Could not reach the analytics endpoint. It may still be starting — try refreshing.
+		</div>
+
+		<!-- Headline stat tiles -->
+		<section class="tiles" aria-label="Totals">
+			<div class="tile" style="--tile-accent: #ab8f00;">
+				<span class="tile-label">Page views</span>
+				<span class="tile-value" id="tile-views">–</span>
+			</div>
+			<div class="tile" style="--tile-accent: #5a78d6;">
+				<span class="tile-label">Files converted</span>
+				<span class="tile-value" id="tile-files">–</span>
+			</div>
+			<div class="tile" style="--tile-accent: #d94e28;">
+				<span class="tile-label">Downloads</span>
+				<span class="tile-value" id="tile-downloads">–</span>
+			</div>
+			<div class="tile" style="--tile-accent: #f5f2e9;">
+				<span class="tile-label">View &rarr; download</span>
+				<span class="tile-value" id="tile-rate">–</span>
+			</div>
+		</section>
+
+		<!-- Conversion funnel -->
+		<section class="panel">
+			<h2 class="panel-title">Conversion funnel <span class="panel-note">all time</span></h2>
+			<div id="funnel" class="funnel" role="img" aria-label="Conversion funnel from views to downloads"></div>
+		</section>
+
+		<!-- Daily activity -->
+		<section class="panel">
+			<h2 class="panel-title">Daily activity <span class="panel-note">last 14 days</span></h2>
+			<div class="legend" aria-hidden="true">
+				<span class="legend-item"><span class="swatch" style="background:#ab8f00"></span>Views</span>
+				<span class="legend-item"><span class="swatch" style="background:#5a78d6"></span>Files</span>
+				<span class="legend-item"><span class="swatch" style="background:#d94e28"></span>Downloads</span>
+			</div>
+			<div class="chart-wrap">
+				<svg id="daily-chart" viewBox="0 0 720 240" preserveAspectRatio="xMidYMid meet"></svg>
+				<div id="chart-tooltip" class="chart-tooltip hidden"></div>
+			</div>
+			<details class="table-view">
+				<summary>View as table</summary>
+				<table>
+					<thead>
+						<tr><th>Date</th><th>Views</th><th>Files</th><th>Downloads</th></tr>
+					</thead>
+					<tbody id="table-body"></tbody>
+				</table>
+			</details>
+		</section>
+	</main>
+</Layout>
+
+<style>
+	.stats-layout {
+		flex-grow: 1;
+		width: 100%;
+		max-width: 960px;
+		margin: 0 auto;
+		padding: 3rem 2rem 5rem 2rem;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		z-index: 10;
+	}
+
+	.stats-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	h1 {
+		font-size: 2rem;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		color: var(--color-text);
+	}
+
+	.stats-sub {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		max-width: 560px;
+		margin-top: 0.4rem;
+		line-height: 1.6;
+	}
+
+	.stats-sub a {
+		color: var(--color-primary);
+	}
+
+	.stats-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.updated-at {
+		font-size: 0.75rem;
+		font-family: var(--font-mono);
+		color: var(--color-text-dim);
+	}
+
+	.refresh-btn {
+		background: transparent;
+		border: 2px solid rgba(245, 242, 233, 0.2);
+		color: var(--color-text-muted);
+		font-family: var(--font-sans);
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		padding: 0.45rem 0.9rem;
+		cursor: pointer;
+		transition: var(--transition-fast);
+	}
+
+	.refresh-btn:hover {
+		color: var(--color-text);
+		border-color: var(--color-primary);
+	}
+
+	.stats-error {
+		border: 1px solid rgba(255, 61, 0, 0.4);
+		background: rgba(255, 61, 0, 0.08);
+		color: var(--color-text);
+		padding: 0.85rem 1rem;
+		font-size: 0.875rem;
+	}
+
+	.stats-error.hidden {
+		display: none;
+	}
+
+	/* Stat tiles */
+	.tiles {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 1rem;
+	}
+
+	.tile {
+		background: var(--color-card-bg);
+		border: 1px solid var(--color-card-border);
+		border-left: 3px solid var(--tile-accent);
+		padding: 1.1rem 1.25rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+	}
+
+	.tile-label {
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--color-text-muted);
+		font-weight: 600;
+	}
+
+	.tile-value {
+		font-size: 1.9rem;
+		font-weight: 700;
+		font-family: var(--font-mono);
+		color: var(--color-text);
+		line-height: 1.1;
+	}
+
+	/* Panels */
+	.panel {
+		background: var(--color-card-bg);
+		border: 1px solid var(--color-card-border);
+		padding: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1.1rem;
+	}
+
+	.panel-title {
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.panel-note {
+		font-size: 0.7rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--color-text-dim);
+		margin-left: 0.5rem;
+	}
+
+	/* Funnel bars */
+	.funnel {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+	}
+
+	.funnel :global(.funnel-row) {
+		display: grid;
+		grid-template-columns: 90px 1fr 120px;
+		align-items: center;
+		gap: 0.75rem;
+		font-size: 0.8rem;
+	}
+
+	.funnel :global(.funnel-name) {
+		color: var(--color-text-muted);
+		font-weight: 600;
+	}
+
+	.funnel :global(.funnel-track) {
+		height: 18px;
+		background: rgba(245, 242, 233, 0.04);
+	}
+
+	.funnel :global(.funnel-bar) {
+		height: 100%;
+		min-width: 2px;
+		border-radius: 0 2px 2px 0;
+	}
+
+	.funnel :global(.funnel-val) {
+		font-family: var(--font-mono);
+		color: var(--color-text);
+		white-space: nowrap;
+	}
+
+	.funnel :global(.funnel-val small) {
+		color: var(--color-text-dim);
+		margin-left: 0.35rem;
+	}
+
+	/* Legend */
+	.legend {
+		display: flex;
+		gap: 1.25rem;
+		flex-wrap: wrap;
+	}
+
+	.legend-item {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+	}
+
+	.swatch {
+		width: 10px;
+		height: 10px;
+		display: inline-block;
+	}
+
+	/* Chart */
+	.chart-wrap {
+		position: relative;
+		width: 100%;
+	}
+
+	#daily-chart {
+		width: 100%;
+		height: auto;
+		display: block;
+	}
+
+	.chart-tooltip {
+		position: absolute;
+		pointer-events: none;
+		background: #0a0a08;
+		border: 1px solid rgba(245, 242, 233, 0.2);
+		padding: 0.6rem 0.75rem;
+		font-size: 0.75rem;
+		min-width: 130px;
+		z-index: 20;
+	}
+
+	.chart-tooltip.hidden {
+		display: none;
+	}
+
+	.chart-tooltip :global(.tt-date) {
+		font-weight: 700;
+		color: var(--color-text);
+		margin-bottom: 0.35rem;
+		font-family: var(--font-mono);
+	}
+
+	.chart-tooltip :global(.tt-row) {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		color: var(--color-text-muted);
+		line-height: 1.6;
+	}
+
+	.chart-tooltip :global(.tt-row b) {
+		margin-left: auto;
+		font-family: var(--font-mono);
+		color: var(--color-text);
+		font-weight: 600;
+	}
+
+	.chart-tooltip :global(.tt-swatch) {
+		width: 8px;
+		height: 8px;
+		display: inline-block;
+		flex-shrink: 0;
+	}
+
+	/* Table view */
+	.table-view summary {
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		cursor: pointer;
+		user-select: none;
+	}
+
+	.table-view summary:hover {
+		color: var(--color-text);
+	}
+
+	.table-view table {
+		width: 100%;
+		margin-top: 0.75rem;
+		border-collapse: collapse;
+		font-size: 0.8rem;
+	}
+
+	.table-view th,
+	.table-view td {
+		text-align: right;
+		padding: 0.45rem 0.6rem;
+		border-bottom: 1px solid rgba(245, 242, 233, 0.06);
+		font-family: var(--font-mono);
+		color: var(--color-text-muted);
+	}
+
+	.table-view th {
+		font-family: var(--font-sans);
+		text-transform: uppercase;
+		font-size: 0.65rem;
+		letter-spacing: 0.05em;
+		color: var(--color-text-dim);
+	}
+
+	.table-view th:first-child,
+	.table-view td:first-child {
+		text-align: left;
+	}
+
+	@media (max-width: 640px) {
+		.stats-layout {
+			padding: 2rem 1.25rem 3rem 1.25rem;
+		}
+
+		.funnel :global(.funnel-row) {
+			grid-template-columns: 70px 1fr 105px;
+		}
+	}
+</style>
+
+<script>
+	// Series identity: color follows the entity everywhere on this page.
+	// Palette validated for the dark card surface (#12120d): CVD-safe, in-band.
+	const SERIES = [
+		{ key: 'view', name: 'Views', color: '#ab8f00' },
+		{ key: 'file', name: 'Files', color: '#5a78d6' },
+		{ key: 'download', name: 'Downloads', color: '#d94e28' },
+	] as const;
+
+	const $ = (id: string) => document.getElementById(id) as HTMLElement;
+	const SVG_NS = 'http://www.w3.org/2000/svg';
+	const fmt = (n: number) => n.toLocaleString('en-US');
+
+	type DayCounts = { date: string; view: number; file: number; download: number };
+
+	function normalize(raw: any): { totals: Record<string, number>; days: DayCounts[] } {
+		// Sum across variants; missing events count as 0
+		const totals: Record<string, number> = { view: 0, file: 0, download: 0 };
+		for (const variant of Object.values(raw.totals || {}) as any[]) {
+			for (const s of SERIES) totals[s.key] += Number(variant[s.key] || 0);
+		}
+
+		const days: DayCounts[] = Object.keys(raw.byDay || {})
+			.sort()
+			.slice(-14)
+			.map((date) => {
+				const day: DayCounts = { date, view: 0, file: 0, download: 0 };
+				for (const variant of Object.values(raw.byDay[date]) as any[]) {
+					for (const s of SERIES) day[s.key] += Number(variant[s.key] || 0);
+				}
+				return day;
+			});
+		return { totals, days };
+	}
+
+	function renderTiles(totals: Record<string, number>) {
+		$('tile-views').textContent = fmt(totals.view);
+		$('tile-files').textContent = fmt(totals.file);
+		$('tile-downloads').textContent = fmt(totals.download);
+		$('tile-rate').textContent = totals.view > 0
+			? `${((totals.download / totals.view) * 100).toFixed(1)}%`
+			: '–';
+	}
+
+	function renderFunnel(totals: Record<string, number>) {
+		const max = Math.max(totals.view, 1);
+		$('funnel').innerHTML = SERIES.map((s) => {
+			const val = totals[s.key];
+			const pct = totals.view > 0 ? ((val / totals.view) * 100).toFixed(1) : '0.0';
+			const width = Math.max((val / max) * 100, val > 0 ? 1 : 0);
+			return `<div class="funnel-row">
+				<span class="funnel-name">${s.name}</span>
+				<div class="funnel-track"><div class="funnel-bar" style="width:${width}%;background:${s.color}"></div></div>
+				<span class="funnel-val">${fmt(val)}<small>${pct}%</small></span>
+			</div>`;
+		}).join('');
+	}
+
+	function renderChart(days: DayCounts[]) {
+		const svg = $('daily-chart') as unknown as SVGSVGElement;
+		svg.innerHTML = '';
+		const tooltip = $('chart-tooltip');
+		tooltip.classList.add('hidden');
+
+		const W = 720, H = 240;
+		const M = { top: 14, right: 12, bottom: 28, left: 40 };
+		const plotW = W - M.left - M.right;
+		const plotH = H - M.top - M.bottom;
+
+		const el = (tag: string, attrs: Record<string, string | number>) => {
+			const node = document.createElementNS(SVG_NS, tag);
+			for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, String(v));
+			return node;
+		};
+
+		if (days.length === 0) {
+			const empty = el('text', { x: W / 2, y: H / 2, 'text-anchor': 'middle', fill: '#75715f', 'font-size': 13 });
+			empty.textContent = 'No activity yet — events appear within a minute.';
+			svg.appendChild(empty);
+			return;
+		}
+
+		const maxVal = Math.max(...days.flatMap((d) => SERIES.map((s) => d[s.key])), 1);
+		// Round the axis top up to a clean step
+		const step = Math.max(1, Math.ceil(maxVal / 4));
+		const axisMax = step * 4;
+		const y = (v: number) => M.top + plotH - (v / axisMax) * plotH;
+
+		// Recessive horizontal grid + axis labels
+		for (let i = 0; i <= 4; i++) {
+			const v = step * i;
+			const gy = y(v);
+			svg.appendChild(el('line', { x1: M.left, x2: W - M.right, y1: gy, y2: gy, stroke: 'rgba(245,242,233,0.06)', 'stroke-width': 1 }));
+			const lbl = el('text', { x: M.left - 8, y: gy + 4, 'text-anchor': 'end', fill: '#75715f', 'font-size': 10, 'font-family': 'ui-monospace, Consolas, monospace' });
+			lbl.textContent = fmt(v);
+			svg.appendChild(lbl);
+		}
+
+		const groupW = plotW / days.length;
+		const barGap = 2; // surface gap between adjacent bars
+		const barW = Math.min(22, Math.max(6, (groupW * 0.6 - barGap * (SERIES.length - 1)) / SERIES.length));
+		const clusterW = barW * SERIES.length + barGap * (SERIES.length - 1);
+
+		days.forEach((d, i) => {
+			const gx = M.left + i * groupW;
+			const cx = gx + groupW / 2;
+
+			// x label (thin out if many days)
+			if (days.length <= 7 || i % 2 === 0) {
+				const xl = el('text', { x: cx, y: H - 8, 'text-anchor': 'middle', fill: '#75715f', 'font-size': 10, 'font-family': 'ui-monospace, Consolas, monospace' });
+				xl.textContent = d.date.slice(5); // MM-DD
+				svg.appendChild(xl);
+			}
+
+			// bars
+			SERIES.forEach((s, si) => {
+				const v = d[s.key];
+				const bx = cx - clusterW / 2 + si * (barW + barGap);
+				const by = y(v);
+				const bh = Math.max(M.top + plotH - by, v > 0 ? 2 : 0);
+				if (bh > 0) {
+					svg.appendChild(el('rect', { x: bx, y: M.top + plotH - bh, width: barW, height: bh, fill: s.color, rx: 2 }));
+				}
+			});
+
+			// hover target: full-height invisible rect per day group
+			const hit = el('rect', { x: gx, y: M.top, width: groupW, height: plotH, fill: 'transparent' });
+			const underlay = el('rect', { x: gx, y: M.top, width: groupW, height: plotH, fill: 'rgba(245,242,233,0.04)', opacity: 0 });
+			svg.insertBefore(underlay, svg.firstChild);
+
+			hit.addEventListener('mouseenter', () => {
+				underlay.setAttribute('opacity', '1');
+				tooltip.innerHTML = `<div class="tt-date">${d.date}</div>` + SERIES.map((s) =>
+					`<div class="tt-row"><span class="tt-swatch" style="background:${s.color}"></span>${s.name}<b>${fmt(d[s.key])}</b></div>`
+				).join('');
+				tooltip.classList.remove('hidden');
+				const wrap = svg.parentElement!.getBoundingClientRect();
+				const frac = (gx + groupW / 2) / W;
+				const px = frac * wrap.width;
+				tooltip.style.left = `${Math.min(Math.max(px - 65, 0), wrap.width - 140)}px`;
+				tooltip.style.top = '10px';
+			});
+			hit.addEventListener('mouseleave', () => {
+				underlay.setAttribute('opacity', '0');
+				tooltip.classList.add('hidden');
+			});
+			svg.appendChild(hit);
+		});
+	}
+
+	function renderTable(days: DayCounts[]) {
+		$('table-body').innerHTML = days.length
+			? days.slice().reverse().map((d) =>
+				`<tr><td>${d.date}</td><td>${fmt(d.view)}</td><td>${fmt(d.file)}</td><td>${fmt(d.download)}</td></tr>`
+			).join('')
+			: '<tr><td colspan="4">No data yet</td></tr>';
+	}
+
+	async function load() {
+		try {
+			const res = await fetch('/api/stats', { cache: 'no-store' });
+			if (!res.ok) throw new Error(String(res.status));
+			const raw = await res.json();
+			const { totals, days } = normalize(raw);
+			renderTiles(totals);
+			renderFunnel(totals);
+			renderChart(days);
+			renderTable(days);
+			$('stats-error').classList.add('hidden');
+			$('updated-at').textContent = `updated ${new Date().toLocaleTimeString()}`;
+		} catch {
+			$('stats-error').classList.remove('hidden');
+			$('updated-at').textContent = 'update failed';
+		}
+	}
+
+	document.addEventListener('DOMContentLoaded', () => {
+		load();
+		$('btn-refresh').addEventListener('click', load);
+		setInterval(load, 60_000);
+	});
+</script>

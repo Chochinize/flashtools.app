@@ -1,0 +1,225 @@
+---
+---
+<div class="compare-slider-container disabled" id="compare-slider">
+	<div class="compare-wrapper">
+		<!-- Background (Original PNG) -->
+		<div class="image-slide slide-original">
+			<img id="img-original" src="" alt="Original PNG" />
+			<div class="label label-left">Original (PNG)</div>
+		</div>
+
+		<!-- Foreground (Compressed WebP) -->
+		<div class="image-slide slide-webp" style="--percent: 50%;">
+			<img id="img-webp" src="" alt="Compressed WebP" />
+			<div class="label label-right">Compressed (WebP)</div>
+		</div>
+
+		<!-- Split Line / Handle -->
+		<div class="slider-handle" style="--percent: 50%;" id="slider-handle">
+			<div class="handle-line"></div>
+			<div class="handle-button">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 5 19 12 12 19"></polyline><polyline points="5 5 12 12 5 19"></polyline></svg>
+			</div>
+			<div class="handle-line"></div>
+		</div>
+
+		<!-- Invisible Range Input for Interaction -->
+		<input 
+			type="range" 
+			min="0" 
+			max="100" 
+			value="50" 
+			class="slider-input" 
+			id="slider-range-input" 
+			aria-label="Compare original and compressed images" 
+		/>
+	</div>
+</div>
+
+<style>
+	.compare-slider-container {
+		position: relative;
+		width: 100%;
+		overflow: hidden;
+		border: 1px solid var(--color-card-border);
+		background: #0d0d0a;
+		transition: opacity var(--transition-normal), transform var(--transition-normal);
+		aspect-ratio: 16/10;
+		max-height: 500px;
+	}
+
+	.compare-slider-container.disabled {
+		opacity: 0.3;
+		pointer-events: none;
+		transform: scale(0.98);
+	}
+
+	.compare-wrapper {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		user-select: none;
+	}
+
+	.image-slide {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.image-slide img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		display: block;
+		padding: 1.5rem;
+		box-sizing: border-box;
+	}
+
+	/* Overlay WebP with Clip Path */
+	.slide-webp {
+		clip-path: polygon(var(--percent) 0%, 100% 0%, 100% 100%, var(--percent) 100%);
+		z-index: 10;
+	}
+
+	/* Labels */
+	.label {
+		position: absolute;
+		bottom: 1.25rem;
+		padding: 0.4rem 0.8rem;
+		background: rgba(10, 10, 8, 0.85);
+		backdrop-filter: blur(8px);
+		border: 1px solid rgba(245, 242, 233, 0.12);
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.025em;
+		z-index: 20;
+		pointer-events: none;
+		text-transform: uppercase;
+	}
+
+	.label-left {
+		left: 1.25rem;
+		color: var(--color-text-muted);
+	}
+
+	.label-right {
+		right: 1.25rem;
+		color: var(--color-primary);
+		border-color: rgba(255, 212, 0,0.2);
+	}
+
+	/* Slider Control */
+	.slider-handle {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: var(--percent);
+		width: 2px;
+		background: var(--color-primary);
+		transform: translateX(-50%);
+		z-index: 30;
+		pointer-events: none;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.handle-line {
+		flex-grow: 1;
+		width: 2px;
+		background: inherit;
+	}
+
+	.handle-button {
+		width: 38px;
+		height: 38px;
+		background: #0a0a08;
+		border: 2px solid var(--color-primary);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		color: var(--color-text);
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 212, 0,0.25);
+		cursor: ew-resize;
+		transition: transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+	}
+
+	.handle-button svg {
+		width: 16px;
+		height: 16px;
+		transform: rotate(0deg);
+		transition: transform var(--transition-normal);
+		color: var(--color-primary);
+	}
+
+	/* Range Input */
+	.slider-input {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		opacity: 0;
+		cursor: ew-resize;
+		z-index: 40;
+		margin: 0;
+	}
+
+	/* Hover Effects */
+	.compare-wrapper:hover .handle-button {
+		transform: scale(1.08);
+		background-color: var(--color-primary);
+		border-color: var(--color-primary);
+	}
+
+	.compare-wrapper:hover .handle-button svg {
+		color: #0a0a08;
+		transform: scale(1.1);
+	}
+
+	/* Disable states for input element */
+	.disabled .slider-input {
+		cursor: not-allowed;
+	}
+</style>
+
+<script>
+	// Component-level interactions
+	document.addEventListener('DOMContentLoaded', () => {
+		const container = document.getElementById('compare-slider') as HTMLElement;
+		const sliderInput = document.getElementById('slider-range-input') as HTMLInputElement;
+		const webpSlide = container?.querySelector('.slide-webp') as HTMLElement;
+		const handle = document.getElementById('slider-handle') as HTMLElement;
+
+		if (!sliderInput || !webpSlide || !handle) return;
+
+		const updateSlider = (val: string) => {
+			const percent = `${val}%`;
+			webpSlide.style.setProperty('--percent', percent);
+			handle.style.setProperty('--percent', percent);
+		};
+
+		sliderInput.addEventListener('input', (e) => {
+			const val = (e.target as HTMLInputElement).value;
+			updateSlider(val);
+		});
+
+		// Listen for reset events or image update events
+		document.addEventListener('image-converted', () => {
+			container.classList.remove('disabled');
+			sliderInput.value = '50';
+			updateSlider('50');
+		});
+
+		document.addEventListener('image-cleared', () => {
+			container.classList.add('disabled');
+		});
+	});
+</script>

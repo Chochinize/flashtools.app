@@ -1,0 +1,120 @@
+---
+---
+<header class="header">
+	<div class="header-container">
+		<div class="logo">
+			<span class="logo-accent">⚡ Flash</span><span class="logo-main">tools</span>
+			<span class="logo-dot">.</span>
+		</div>
+		<nav class="nav">
+			<span class="badge badge-secure">
+				<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+				100% Local / Secure
+			</span>
+			<span class="badge badge-speed">
+				<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+				Native Browser Speed
+			</span>
+		</nav>
+	</div>
+</header>
+
+<style>
+	.header {
+		width: 100%;
+		border-bottom: 1px solid var(--color-card-border);
+		backdrop-filter: blur(12px);
+		background: rgba(10, 10, 8, 0.75);
+		position: sticky;
+		top: 0;
+		z-index: 100;
+	}
+
+	.header-container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 1.25rem 2rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.logo {
+		font-size: 1.5rem;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		text-transform: uppercase;
+		user-select: none;
+	}
+
+	.logo-accent {
+		color: var(--color-primary);
+	}
+
+	.logo-main {
+		color: var(--color-text);
+	}
+
+	.logo-dot {
+		color: var(--color-primary);
+	}
+
+	.nav {
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
+	}
+
+	.badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.35rem 0.75rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.025em;
+		text-transform: uppercase;
+		border: 1px solid transparent;
+		transition: var(--transition-fast);
+	}
+
+	.badge svg {
+		flex-shrink: 0;
+	}
+
+	.badge-secure {
+		background: transparent;
+		color: var(--color-text-muted);
+		border-color: rgba(245, 242, 233, 0.25);
+	}
+
+	.badge-secure:hover {
+		color: var(--color-text);
+		border-color: rgba(245, 242, 233, 0.45);
+	}
+
+	.badge-speed {
+		background: rgba(255, 212, 0, 0.08);
+		color: var(--color-primary);
+		border-color: rgba(255, 212, 0, 0.35);
+	}
+
+	.badge-speed:hover {
+		background: rgba(255, 212, 0, 0.14);
+		border-color: var(--color-primary);
+	}
+
+	@media (max-width: 640px) {
+		.header-container {
+			padding: 1rem 1.25rem;
+			flex-direction: column;
+			gap: 0.75rem;
+			align-items: flex-start;
+		}
+
+		.nav {
+			width: 100%;
+			justify-content: flex-start;
+		}
+	}
+</style>

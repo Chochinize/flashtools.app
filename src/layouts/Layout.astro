@@ -1,0 +1,222 @@
+---
+import '@fontsource/space-grotesk/400.css';
+import '@fontsource/space-grotesk/500.css';
+import '@fontsource/space-grotesk/700.css';
+
+interface Props {
+	title: string;
+	description?: string;
+	canonicalPath?: string;
+	ogImage?: string;
+	noindex?: boolean;
+}
+
+const {
+	title,
+	description = "Convert PNG images to WebP natively in your browser. 100% private, client-side compression using HTML5 Canvas — no uploads, ever.",
+	canonicalPath = "",
+	ogImage = "/og-image.png",
+	noindex = false
+} = Astro.props;
+
+// Default production URL (changeable upon domain deployment)
+const siteUrl = "https://flashtools.app"; 
+const canonicalUrl = `${siteUrl}${canonicalPath}`;
+const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="generator" content={Astro.generator} />
+		<meta name="theme-color" content="#0a0a08" />
+
+		<!-- Primary SEO Meta Tags -->
+		<title>{title}</title>
+		<meta name="title" content={title} />
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalUrl} />
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Flashtools" />
+		<meta property="og:url" content={canonicalUrl} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={ogImageUrl} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:image:alt" content="Flashtools — free client-side PNG to WebP converter" />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={canonicalUrl} />
+		<meta property="twitter:title" content={title} />
+		<meta property="twitter:description" content={description} />
+		<meta property="twitter:image" content={ogImageUrl} />
+		<meta property="twitter:image:alt" content="Flashtools — free client-side PNG to WebP converter" />
+
+		<!-- Search Bot Instructions -->
+		<meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
+		{!noindex && <meta name="googlebot" content="index, follow" />}
+
+	</head>
+	<body>
+		<!-- Signature hazard stripe + workbench grid backdrop -->
+		<div class="hazard-bar" aria-hidden="true"></div>
+		<div class="bg-grid" aria-hidden="true"></div>
+
+		<slot />
+
+		<script>
+			// First-party anonymous counters: no cookies, no identifiers, no
+			// third parties. Honors Do Not Track. Details on /privacy.
+			// The variant field ('hv' = High Voltage UI) enables future A/B tests.
+			const VARIANT = 'hv';
+			const track = (e: string) => {
+				if (navigator.doNotTrack === '1') return;
+				const payload = JSON.stringify({ e, v: VARIANT });
+				try {
+					if (!navigator.sendBeacon('/api/e', payload)) {
+						fetch('/api/e', { method: 'POST', body: payload, keepalive: true }).catch(() => {});
+					}
+				} catch {
+					// analytics must never break the app
+				}
+			};
+
+			track('view');
+			document.addEventListener('png-file-selected', () => track('file'));
+			document.addEventListener('click', (ev) => {
+				const target = ev.target as HTMLElement | null;
+				if (target?.closest('#btn-download:not(.disabled)')) track('download');
+			});
+		</script>
+	</body>
+</html>
+
+<style is:global>
+	:root {
+		--color-bg: #0a0a08;
+		--color-card-bg: #12120d;
+		--color-card-bg-hover: #17170f;
+		--color-card-border: rgba(245, 242, 233, 0.12);
+		--color-card-border-active: rgba(255, 212, 0, 0.6);
+
+		--color-primary: #ffd400;
+		--color-primary-hover: #ffe14d;
+		--color-secondary: #ff3d00;
+		--color-secondary-hover: #ff6333;
+		--color-success: #ffd400;
+		--color-success-bg: rgba(255, 212, 0, 0.08);
+
+		--color-text: #f5f2e9;
+		--color-text-muted: #a8a494;
+		--color-text-dim: #75715f;
+
+		--font-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+		--font-mono: ui-monospace, 'Cascadia Code', 'Consolas', 'JetBrains Mono', monospace;
+
+		--transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+		--transition-normal: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+		--transition-slow: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+		--shadow-premium: none;
+		--shadow-glow: 4px 4px 0 rgba(255, 212, 0, 0.25);
+
+		--hazard-stripes: repeating-linear-gradient(
+			-45deg,
+			#ffd400 0 12px,
+			#0a0a08 12px 24px
+		);
+	}
+
+	/* Reset */
+	*, *::before, *::after {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+	}
+
+	html {
+		font-family: var(--font-sans);
+		background-color: var(--color-bg);
+		color: var(--color-text);
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		scroll-behavior: smooth;
+		height: 100%;
+		overflow-x: hidden;
+	}
+
+	body {
+		min-height: 100%;
+		display: flex;
+		flex-direction: column;
+		position: relative;
+	}
+
+	/* Custom Scrollbar */
+	::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: var(--color-bg);
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: #2a2a20;
+		transition: var(--transition-fast);
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: #ffd400;
+	}
+
+	/* Selection styling: inverted hazard */
+	::selection {
+		background: #ffd400;
+		color: #0a0a08;
+	}
+
+	/* Interactive elements outline */
+	*:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 4px;
+	}
+
+	/* Signature top hazard stripe */
+	.hazard-bar {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 6px;
+		background: var(--hazard-stripes);
+		z-index: 200;
+		pointer-events: none;
+	}
+
+	/* Faint workbench blueprint grid */
+	.bg-grid {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		pointer-events: none;
+		z-index: 0;
+		background-image:
+			linear-gradient(rgba(245, 242, 233, 0.025) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(245, 242, 233, 0.025) 1px, transparent 1px);
+		background-size: 48px 48px;
+		mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 80%);
+		-webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 80%);
+	}
+</style>

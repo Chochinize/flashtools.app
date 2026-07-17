@@ -1,0 +1,841 @@
+---
+import DropZone from './DropZone.astro';
+import CompareSlider from './CompareSlider.astro';
+---
+
+<div class="converter-container">
+	<!-- Initial Upload Phase -->
+	<div id="upload-phase" class="phase-active">
+		<div class="intro-text">
+			<h1 class="hero-title">Optimize PNGs <span class="hero-hl">Instantly</span></h1>
+			<p class="hero-subtitle">Natively in your browser. No files ever touch our servers. Private, fast, and secure.</p>
+		</div>
+		<DropZone />
+	</div>
+
+	<!-- Interactive Workspace Phase -->
+	<div id="workspace-phase" class="phase-hidden workspace-grid">
+		
+		<!-- Left Panel: Configuration & Stats -->
+		<aside class="workspace-sidebar">
+			<!-- Selected File Details -->
+			<div class="workspace-card file-details-card">
+				<div class="card-header">
+					<div class="card-header-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+					</div>
+					<h2 class="card-title">File Details</h2>
+				</div>
+				<div class="file-meta">
+					<div class="meta-row">
+						<span class="meta-label">Name</span>
+						<span class="meta-val filename-text" id="meta-filename">image.png</span>
+					</div>
+					<div class="meta-row">
+						<span class="meta-label">Dimensions</span>
+						<span class="meta-val" id="meta-dimensions">0 × 0 px</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Quality Settings Card -->
+			<div class="workspace-card settings-card">
+				<div class="card-header">
+					<div class="card-header-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+					</div>
+					<h2 class="card-title">WebP Quality Settings</h2>
+				</div>
+				<div class="quality-control-container">
+					<div class="quality-display">
+						<span class="quality-label">Compression Level</span>
+						<span class="quality-percent" id="quality-val-display">80%</span>
+					</div>
+					<input 
+						type="range" 
+						id="quality-slider" 
+						min="10" 
+						max="100" 
+						value="80" 
+						class="quality-slider-bar" 
+					/>
+					<div class="slider-ticks">
+						<span>Smallest File</span>
+						<span>Balanced</span>
+						<span>Best Quality</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Live Compression Performance Stats -->
+			<div class="workspace-card stats-card">
+				<div class="card-header">
+					<div class="card-header-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+					</div>
+					<h2 class="card-title">Compression Savings</h2>
+				</div>
+				
+				<div class="stats-comparison">
+					<div class="stat-box">
+						<span class="stat-lbl">Original</span>
+						<span class="stat-number text-muted" id="stat-original-size">0.0 KB</span>
+					</div>
+					<div class="stat-divider">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+					</div>
+					<div class="stat-box">
+						<span class="stat-lbl">Optimized</span>
+						<span class="stat-number text-primary" id="stat-optimized-size">0.0 KB</span>
+					</div>
+				</div>
+
+				<div class="savings-container hidden" id="savings-badge-wrapper">
+					<div class="savings-badge">
+						<span class="savings-percent" id="savings-percent-val">0%</span>
+						<span class="savings-label">space saved</span>
+					</div>
+				</div>
+
+				<div class="performance-footer">
+					<span class="perf-metric">Speed: <strong id="perf-time">0ms</strong></span>
+				</div>
+			</div>
+
+			<!-- Dynamic Actions -->
+			<div class="actions-panel">
+				<a id="btn-download" href="#" download="" class="btn btn-primary disabled">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+					Download WebP
+				</a>
+				<button id="btn-reset" class="btn btn-secondary">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M16 3h5v5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 21H3v-5"></path></svg>
+					Choose Different File
+				</button>
+			</div>
+		</aside>
+
+		<!-- Right Panel: Immersive Visual Comparison Slider -->
+		<main class="workspace-preview-area">
+			<div class="preview-header">
+				<div class="preview-title-group">
+					<span class="badge badge-interactive">Interactive Comparison</span>
+					<p class="preview-description">Slide left and right to inspect image resolution & WebP quality details.</p>
+				</div>
+			</div>
+			
+			<div class="preview-wrapper-outer">
+				<div class="processing-overlay hidden" id="processing-indicator">
+					<div class="spinner"></div>
+					<p>Compressing using browser Canvas...</p>
+				</div>
+				<CompareSlider />
+			</div>
+		</main>
+
+	</div>
+</div>
+
+<style>
+	.converter-container {
+		width: 100%;
+		max-width: 1200px;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		z-index: 10;
+		position: relative;
+	}
+
+	/* Upload Phase Intro Styling */
+	.intro-text {
+		text-align: center;
+		margin-bottom: 2.5rem;
+	}
+
+	.hero-title {
+		font-size: 3rem;
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		color: var(--color-text);
+		margin-bottom: 0.75rem;
+	}
+
+	/* Highlighter-marker brand accent */
+	.hero-hl {
+		background: var(--color-primary);
+		color: #0a0a08;
+		padding: 0 0.4rem;
+		box-decoration-break: clone;
+		-webkit-box-decoration-break: clone;
+	}
+
+	.hero-subtitle {
+		font-size: 1.125rem;
+		color: var(--color-text-muted);
+		max-width: 600px;
+		margin: 0 auto;
+		line-height: 1.6;
+	}
+
+	/* Phase Visibility States */
+	.phase-active {
+		display: block;
+		animation: fadeIn var(--transition-slow);
+	}
+
+	.phase-hidden {
+		display: none;
+	}
+
+	.workspace-grid {
+		display: grid;
+		grid-template-columns: 360px 1fr;
+		gap: 2rem;
+		width: 100%;
+		animation: fadeIn var(--transition-slow);
+	}
+
+	/* Sidebar Details */
+	.workspace-sidebar {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+
+	.workspace-card {
+		background: var(--color-card-bg);
+		border: 1px solid var(--color-card-border);
+		padding: 1.5rem;
+	}
+
+	.card-header {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin-bottom: 1.25rem;
+		border-bottom: 1px solid rgba(245, 242, 233, 0.06);
+		padding-bottom: 0.75rem;
+	}
+
+	.card-header-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		background: rgba(255, 212, 0,0.08);
+		color: var(--color-primary);
+	}
+
+	.card-title {
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--color-text);
+		letter-spacing: -0.01em;
+	}
+
+	/* File Meta Row layout */
+	.file-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.meta-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 0.875rem;
+	}
+
+	.meta-label {
+		color: var(--color-text-muted);
+	}
+
+	.meta-val {
+		color: var(--color-text);
+		font-weight: 500;
+	}
+
+	.filename-text {
+		max-width: 180px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	/* Settings Controls Styling */
+	.quality-control-container {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.quality-display {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.quality-label {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+	}
+
+	.quality-percent {
+		font-size: 1.25rem;
+		font-weight: 700;
+		font-family: var(--font-mono);
+		color: var(--color-primary);
+	}
+
+	/* Range Slider Custom Styling.
+	   The input itself is 28px tall for an easy grab/drag target;
+	   the visible 6px track is drawn on the track pseudo-elements. */
+	.quality-slider-bar {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 100%;
+		height: 28px;
+		background: transparent;
+		outline: none;
+		cursor: pointer;
+	}
+
+	.quality-slider-bar::-webkit-slider-runnable-track {
+		height: 6px;
+		background: #26261c;
+	}
+
+	.quality-slider-bar::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 16px;
+		height: 16px;
+		margin-top: -5px;
+		background: var(--color-primary);
+		cursor: ew-resize;
+		box-shadow: 0 0 10px rgba(255, 212, 0,0.4);
+		transition: transform var(--transition-fast), background-color var(--transition-fast);
+	}
+
+	.quality-slider-bar::-webkit-slider-thumb:hover {
+		transform: scale(1.2);
+		background: var(--color-primary-hover);
+	}
+
+	.quality-slider-bar::-moz-range-track {
+		height: 6px;
+		background: #26261c;
+	}
+
+	.quality-slider-bar::-moz-range-thumb {
+		width: 16px;
+		height: 16px;
+		border: none;
+		border-radius: 0;
+		background: var(--color-primary);
+		cursor: ew-resize;
+		box-shadow: 0 0 10px rgba(255, 212, 0,0.4);
+		transition: transform var(--transition-fast), background-color var(--transition-fast);
+	}
+
+	.quality-slider-bar::-moz-range-thumb:hover {
+		transform: scale(1.2);
+		background: var(--color-primary-hover);
+	}
+
+	.slider-ticks {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.7rem;
+		color: var(--color-text-dim);
+	}
+
+	/* Performance/Stats box layout */
+	.stats-comparison {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 1.25rem;
+	}
+
+	.stat-box {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		flex: 1;
+	}
+
+	.stat-lbl {
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.stat-number {
+		font-size: 1.125rem;
+		font-weight: 700;
+		font-family: var(--font-mono);
+	}
+
+	.text-muted {
+		color: var(--color-text-muted);
+	}
+
+	.text-primary {
+		color: var(--color-primary);
+	}
+
+	.stat-divider {
+		padding: 0 1rem;
+		color: var(--color-text-dim);
+		display: flex;
+		align-items: center;
+	}
+
+	.savings-container {
+		width: 100%;
+		margin-bottom: 1rem;
+		transition: opacity var(--transition-normal);
+	}
+
+	.savings-container.hidden {
+		display: none;
+	}
+
+	/* Hazard-sticker savings badge: black on yellow */
+	.savings-badge {
+		background: var(--color-primary);
+		padding: 0.75rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		animation: pulse-success 3s infinite;
+	}
+
+	.savings-percent {
+		font-size: 1.35rem;
+		font-weight: 700;
+		font-family: var(--font-mono);
+		color: #0a0a08;
+	}
+
+	.savings-label {
+		font-size: 0.75rem;
+		color: rgba(10, 10, 8, 0.75);
+		text-transform: uppercase;
+		font-weight: 700;
+		letter-spacing: 0.025em;
+	}
+
+	.performance-footer {
+		font-size: 0.75rem;
+		color: var(--color-text-dim);
+		border-top: 1px solid rgba(245, 242, 233, 0.06);
+		padding-top: 0.75rem;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.perf-metric strong {
+		font-family: var(--font-mono);
+		color: var(--color-text-muted);
+	}
+
+	/* Actions Panel layout */
+	.actions-panel {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.85rem 1.25rem;
+		font-size: 0.875rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		cursor: pointer;
+		text-decoration: none;
+		transition: var(--transition-fast);
+		border: 2px solid transparent;
+		box-sizing: border-box;
+	}
+
+	/* Block button: black on electric yellow, hard orange shadow on hover */
+	.btn-primary {
+		background: var(--color-primary);
+		color: #0a0a08;
+	}
+
+	.btn-primary:not(.disabled):hover {
+		background: var(--color-primary-hover);
+		transform: translate(-2px, -2px);
+		box-shadow: 4px 4px 0 var(--color-secondary);
+	}
+
+	.btn-primary.disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+		box-shadow: none;
+		pointer-events: none;
+	}
+
+	.btn-secondary {
+		background: transparent;
+		border-color: rgba(245, 242, 233, 0.2);
+		color: var(--color-text-muted);
+	}
+
+	.btn-secondary:hover {
+		color: var(--color-text);
+		border-color: rgba(245, 242, 233, 0.45);
+	}
+
+	/* Workspace Preview (Right side) */
+	.workspace-preview-area {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+
+	.preview-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.preview-title-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.badge-interactive {
+		display: inline-flex;
+		align-self: flex-start;
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		padding: 0.25rem 0.5rem;
+		background: rgba(255, 61, 0, 0.1);
+		border: 1px solid rgba(255, 61, 0, 0.35);
+		color: var(--color-secondary);
+	}
+
+	.preview-description {
+		font-size: 0.85rem;
+		color: var(--color-text-muted);
+	}
+
+	.preview-wrapper-outer {
+		position: relative;
+		width: 100%;
+	}
+
+	/* Processing loader overlay */
+	.processing-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(10, 10, 8, 0.85);
+		backdrop-filter: blur(8px);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		z-index: 50;
+		color: var(--color-text);
+		font-weight: 500;
+		font-size: 0.95rem;
+		transition: opacity var(--transition-fast);
+	}
+
+	.processing-overlay.hidden {
+		display: none;
+	}
+
+	.spinner {
+		width: 36px;
+		height: 36px;
+		border: 3px solid rgba(255, 212, 0,0.1);
+		border-top-color: var(--color-primary);
+		border-radius: 50%;
+		animation: spin 0.8s linear infinite;
+	}
+
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+
+	@keyframes fadeIn {
+		from { opacity: 0; transform: translateY(8px); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+
+	@keyframes pulse-success {
+		0%, 100% { box-shadow: 0 0 0 0 rgba(255, 212, 0, 0.2); }
+		50% { box-shadow: 0 0 15px 2px rgba(255, 212, 0, 0.35); }
+	}
+
+	/* Tablet/Mobile Responsive adjustments */
+	@media (max-width: 900px) {
+		.workspace-grid {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
+
+		.workspace-sidebar {
+			order: 2;
+		}
+
+		.workspace-preview-area {
+			order: 1;
+		}
+		
+		.hero-title {
+			font-size: 2.25rem;
+		}
+	}
+</style>
+
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		// Element Selectors
+		const uploadPhase = document.getElementById('upload-phase') as HTMLElement;
+		const workspacePhase = document.getElementById('workspace-phase') as HTMLElement;
+		
+		const metaFilename = document.getElementById('meta-filename') as HTMLElement;
+		const metaDimensions = document.getElementById('meta-dimensions') as HTMLElement;
+		
+		const qualitySlider = document.getElementById('quality-slider') as HTMLInputElement;
+		const qualityDisplay = document.getElementById('quality-val-display') as HTMLElement;
+		
+		const statOriginal = document.getElementById('stat-original-size') as HTMLElement;
+		const statOptimized = document.getElementById('stat-optimized-size') as HTMLElement;
+		const savingsWrapper = document.getElementById('savings-badge-wrapper') as HTMLElement;
+		const savingsPercentVal = document.getElementById('savings-percent-val') as HTMLElement;
+		const perfTime = document.getElementById('perf-time') as HTMLElement;
+		
+		const btnDownload = document.getElementById('btn-download') as HTMLAnchorElement;
+		const btnReset = document.getElementById('btn-reset') as HTMLButtonElement;
+		
+		const processingOverlay = document.getElementById('processing-indicator') as HTMLElement;
+		
+		const imgOriginal = document.getElementById('img-original') as HTMLImageElement;
+		const imgWebp = document.getElementById('img-webp') as HTMLImageElement;
+
+		// Session State Variables
+		let activeFile: File | null = null;
+		let loadedImage: HTMLImageElement | null = null;
+		let originalObjectUrl: string | null = null;
+		let webpObjectUrl: string | null = null;
+		let isProcessing = false;
+		let compressSeq = 0;
+		let liveCompressTimer: number | null = null;
+
+		// Helper to format bytes
+		const formatBytes = (bytes: number, decimals = 1) => {
+			if (bytes === 0) return '0 Bytes';
+			const k = 1024;
+			const dm = decimals < 0 ? 0 : decimals;
+			const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+			const i = Math.floor(Math.log(bytes) / Math.log(k));
+			return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+		};
+
+		// 1. Process PNG Selection
+		document.addEventListener('png-file-selected', (e: Event) => {
+			const customEvent = e as CustomEvent;
+			const { file } = customEvent.detail;
+			if (!file) return;
+
+			activeFile = file;
+			
+			// Show spinner/workspace phase
+			uploadPhase.className = 'phase-hidden';
+			workspacePhase.className = 'workspace-grid';
+
+			// Revoke previous URLs
+			cleanupUrls();
+
+			// Setup original preview URL
+			originalObjectUrl = URL.createObjectURL(file);
+			imgOriginal.src = originalObjectUrl;
+
+			// Populate details
+			metaFilename.textContent = file.name;
+			statOriginal.textContent = formatBytes(file.size);
+
+			// Load into image object to read dimensions & draw onto canvas
+			isProcessing = true;
+			processingOverlay.classList.remove('hidden');
+
+			const img = new Image();
+			img.onload = () => {
+				loadedImage = img;
+				metaDimensions.textContent = `${img.naturalWidth} × ${img.naturalHeight} px`;
+
+				// Run compression
+				compressImage();
+			};
+			img.onerror = () => {
+				isProcessing = false;
+				processingOverlay.classList.add('hidden');
+				alert('This PNG could not be decoded. The file may be corrupt or truncated.');
+				resetAll();
+			};
+			img.src = originalObjectUrl;
+		});
+
+		// 2. Perform Native Canvas Compression
+		const compressImage = () => {
+			if (!loadedImage || !activeFile) return;
+
+			isProcessing = true;
+			btnDownload.classList.add('disabled');
+
+			// Only surface the blocking overlay for slow encodes, so live
+			// slider recompression doesn't flicker it on every pause
+			const overlayTimer = window.setTimeout(() => {
+				processingOverlay.classList.remove('hidden');
+			}, 150);
+
+			const seq = ++compressSeq;
+			const startTime = performance.now();
+			const quality = parseInt(qualitySlider.value) / 100;
+
+			// Create offscreen Canvas
+			const canvas = document.createElement('canvas');
+			canvas.width = loadedImage.naturalWidth;
+			canvas.height = loadedImage.naturalHeight;
+			
+			const ctx = canvas.getContext('2d');
+			if (!ctx) {
+				clearTimeout(overlayTimer);
+				alert('Canvas 2D context could not be initialized.');
+				isProcessing = false;
+				processingOverlay.classList.add('hidden');
+				return;
+			}
+
+			// Draw image full scale
+			ctx.drawImage(loadedImage, 0, 0);
+
+			// Extract WebP Blob
+			canvas.toBlob((blob) => {
+				clearTimeout(overlayTimer);
+				// A newer compression run superseded this one while encoding
+				if (seq !== compressSeq) return;
+				if (!blob) {
+					alert('Browser fails to generate WebP. WebP compression might be unsupported.');
+					isProcessing = false;
+					processingOverlay.classList.add('hidden');
+					return;
+				}
+
+				const endTime = performance.now();
+				const duration = Math.round(endTime - startTime);
+
+				// Process results
+				if (webpObjectUrl) URL.revokeObjectURL(webpObjectUrl);
+				webpObjectUrl = URL.createObjectURL(blob);
+				imgWebp.src = webpObjectUrl;
+
+				// Stats and display
+				statOptimized.textContent = formatBytes(blob.size);
+				perfTime.textContent = `${duration}ms`;
+
+				const savingsPercent = Math.round(((activeFile!.size - blob.size) / activeFile!.size) * 100);
+				if (savingsPercent > 0) {
+					savingsPercentVal.textContent = `-${savingsPercent}%`;
+					savingsWrapper.classList.remove('hidden');
+				} else {
+					savingsWrapper.classList.add('hidden');
+				}
+
+				// Download configuration
+				const originalName = activeFile!.name;
+				const webpName = originalName.replace(/\.png$/i, '') + '.webp';
+				btnDownload.href = webpObjectUrl;
+				btnDownload.download = webpName;
+				btnDownload.classList.remove('disabled');
+
+				// Broadcast slider enabled
+				const event = new CustomEvent('image-converted');
+				document.dispatchEvent(event);
+
+				// End UI loader
+				isProcessing = false;
+				processingOverlay.classList.add('hidden');
+			}, 'image/webp', quality);
+		};
+
+		// 3. Slider settings updates: recompress live while dragging (debounced),
+		// with a final run on release.
+		qualitySlider.addEventListener('input', (e) => {
+			const val = (e.target as HTMLInputElement).value;
+			qualityDisplay.textContent = `${val}%`;
+
+			if (liveCompressTimer !== null) clearTimeout(liveCompressTimer);
+			liveCompressTimer = window.setTimeout(() => {
+				liveCompressTimer = null;
+				compressImage();
+			}, 180);
+		});
+
+		qualitySlider.addEventListener('change', () => {
+			if (liveCompressTimer !== null) {
+				clearTimeout(liveCompressTimer);
+				liveCompressTimer = null;
+			}
+			compressImage();
+		});
+
+		// 4. Reset & Cleanup
+		const cleanupUrls = () => {
+			if (originalObjectUrl) {
+				URL.revokeObjectURL(originalObjectUrl);
+				originalObjectUrl = null;
+			}
+			if (webpObjectUrl) {
+				URL.revokeObjectURL(webpObjectUrl);
+				webpObjectUrl = null;
+			}
+		};
+
+		const resetAll = () => {
+			cleanupUrls();
+			activeFile = null;
+			loadedImage = null;
+			imgOriginal.src = '';
+			imgWebp.src = '';
+			
+			// Show selection phase
+			workspacePhase.className = 'phase-hidden';
+			uploadPhase.className = 'phase-active';
+
+			// Clear input values
+			const fileInput = document.getElementById('file-input') as HTMLInputElement;
+			if (fileInput) fileInput.value = '';
+
+			// Broadcast slider reset
+			const event = new CustomEvent('image-cleared');
+			document.dispatchEvent(event);
+		};
+
+		btnReset.addEventListener('click', resetAll);
+	});
+</script>

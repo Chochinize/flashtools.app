@@ -1,0 +1,119 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+---
+
+<Layout
+	title="Privacy Policy - Flashtools"
+	description="Flashtools privacy policy. Your images never leave your device — all conversion happens locally in your browser."
+	canonicalPath="/privacy"
+>
+	<Header />
+
+	<main class="legal-layout">
+		<h1>Privacy Policy</h1>
+		<p class="updated">Last updated: July 16, 2026</p>
+
+		<section>
+			<h2>Your images stay on your device</h2>
+			<p>
+				Flashtools converts PNG images to WebP entirely inside your web browser using the
+				HTML5 Canvas API. Your files are never uploaded, transmitted, or stored on any
+				server. The conversion works even if you disconnect from the internet after the
+				page has loaded.
+			</p>
+		</section>
+
+		<section>
+			<h2>What we collect</h2>
+			<p>
+				Almost nothing. Flashtools has no user accounts, no cookies, no advertising, and no
+				third-party trackers. To understand whether the tool is useful, we count three
+				anonymous events on our own server: a page was viewed, a file was converted, and a
+				result was downloaded. Each count stores only the event type and the hour it
+				happened. We store no IP address, no browser fingerprint, no identifier of any
+				kind, and no information about your files — not their names, contents, sizes, or
+				anything else. These counts cannot be traced to a person, and we honor your
+				browser's <em>Do Not Track</em> setting by not sending them at all. Our web server
+				does not write or retain access logs.
+			</p>
+		</section>
+
+		<section>
+			<h2>Third-party resources and delivery</h2>
+			<p>
+				All assets — including fonts — are served from flashtools.app itself; the page
+				loads no third-party scripts, fonts, or trackers. The site is delivered through
+				<a href="https://www.cloudflare.com/privacypolicy/" rel="noopener noreferrer" target="_blank">Cloudflare</a>,
+				which provides DNS, security, and content-delivery services for flashtools.app.
+				Like any network provider, Cloudflare may process standard connection data (such
+				as your IP address) in transit in order to deliver and protect the service; we do
+				not receive or store that data ourselves.
+			</p>
+		</section>
+
+		<section>
+			<h2>Contact</h2>
+			<p>
+				Questions about this policy? Open an issue on the project repository or contact the
+				site operator.
+			</p>
+		</section>
+
+		<p><a href="/" class="back-link">&larr; Back to converter</a></p>
+	</main>
+</Layout>
+
+<style>
+	.legal-layout {
+		flex-grow: 1;
+		width: 100%;
+		max-width: 760px;
+		margin: 0 auto;
+		padding: 3rem 2rem 5rem 2rem;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		z-index: 10;
+	}
+
+	h1 {
+		font-size: 2.25rem;
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		color: var(--color-text);
+	}
+
+	.updated {
+		font-size: 0.85rem;
+		color: var(--color-text-dim);
+	}
+
+	section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	h2 {
+		font-size: 1.2rem;
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	p {
+		font-size: 0.95rem;
+		color: var(--color-text-muted);
+		line-height: 1.7;
+	}
+
+	a {
+		color: var(--color-primary);
+	}
+
+	.back-link {
+		text-decoration: none;
+		font-weight: 500;
+	}
+</style>
