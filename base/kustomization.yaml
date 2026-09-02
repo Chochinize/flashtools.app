@@ -9,6 +9,6 @@ resources:
   - ingress.yaml
 images:
   - name: chochinize/flashtools-analytics
-    newTag: e5d0d03b6cb1298bff0895d6cdccfaecdbdf741a
+    newTag: b15a4c07b7114360edbdf607347d035b24eb51e9
   - name: chochinize/flashtools
-    newTag: e5d0d03b6cb1298bff0895d6cdccfaecdbdf741a
+    newTag: b15a4c07b7114360edbdf607347d035b24eb51e9
