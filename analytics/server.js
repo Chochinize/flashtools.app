@@ -107,6 +107,7 @@ async function handleStats(res) {
 }
 
 const server = createServer(async (req, res) => {
+	res.setHeader('X-Content-Type-Options', 'nosniff');
 	try {
 		if (req.method === 'POST' && req.url === '/api/e') return await handleEvent(req, res);
 		if (req.method === 'GET' && req.url === '/api/stats') return await handleStats(res);
